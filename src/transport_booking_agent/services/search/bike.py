@@ -4,18 +4,18 @@ import datetime
 
 class BikeSearchService:
     """
-    A service to search for bike rental options.
+    A service to search for motorcycle rental options.
     This is a mock implementation.
     """
     def search(self, query: StructuredQuery) -> List[TransportOption]:
-        # In a real implementation, this would call an external Bike Rental API
-        print(f"Searching for bikes with query: {query}")
+        # In a real implementation, this would call an external Motorcycle Rental API
+        print(f"Searching for motorcycles with query: {query}")
         
         # Mock response
         return [
             TransportOption(
                 type='bike',
-                provider='City Bikes',
+                provider='City Motorcycles',
                 departure_time=datetime.datetime.now() + datetime.timedelta(minutes=5),
                 arrival_time=datetime.datetime.now() + datetime.timedelta(minutes=25),
                 price=8.00,

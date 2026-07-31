@@ -36,6 +36,10 @@ class RecognitionService:
             # Attempt to prefill from user profile if not found in message
             if not provider and mode and user_profile.get("preferred_providers", {}).get(mode):
                 provider = user_profile["preferred_providers"][mode]
+        elif "cab" in message_lower or "taxi" in message_lower:
+            mode = "cab"
+        elif "bike" in message_lower or "motorcycle" in message_lower:
+            mode = "bike"
             
         print(f"Recognized mode: {mode}, provider: {provider}")
         return mode, provider

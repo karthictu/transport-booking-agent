@@ -1,82 +1,28 @@
 # Transport Booking Agent
 
-This project implements an AI-powered Transport Booking Agent using a multi-agent architecture, as detailed in `docs/SPEC.md`. The agent system coordinates various specialized agents to fulfill user requests for booking transport.
-
-## Features
-
-*   **Multi-Agent Architecture**: A central Orchestrator Agent delegates tasks to specialized agents for query parsing, searching, filtering, ranking, booking, and user profile management.
-*   **FastAPI Web Server**: Provides a web interface for user interaction and an API for chat functionality.
-*   **Kubernetes Deployment**: Designed for deployment on Google Kubernetes Engine (GKE) using provided Kubernetes manifests.
-
-## System Architecture
-
-The system utilizes a multi-agent architecture managed by a central **Orchestrator Agent**.
-
-### Data Flow Overview
-
-```mermaid
-graph TD
-    User -- "Book a flight to Paris" --> A(Orchestrator Agent)
-    A -- "Parse this request" --> B(Query Parsing Agent)
-    B -- "origin: here, dest: Paris, mode: flight" --> A
-    A -- "Find flights to Paris" --> C(Search Agent)
-    C -- Calls Flight APIs --> D[External APIs]
-    D -- Raw flight data --> C
-    C -- Unsorted List of Flights --> A
-    A -- "Filter and rank these options" --> E(Filtering & Ranking Agent)
-    E -- Sorted, relevant options --> A
-    A -- Presents options to User --> User
-    User -- "I'll take the first one" --> A
-    A -- "Book this flight" --> F(Booking Agent)
-    F -- Handles booking transaction --> D
-    D -- Confirmation details --> F
-    F -- Booking Confirmation --> A
-    A -- "Your flight is booked!" --> User
-```
-
-### Kubernetes Infrastructure
-
-The application is deployed on Google Kubernetes Engine.
-
-```mermaid
-graph TD
-    subgraph "User's Device"
-        A[Web Browser]
-    end
-
-    subgraph "Google Kubernetes Engine Cluster"
-        B["transport-booking-agent-external Service (Type: LoadBalancer)"]
-        D["transport-booking-agent Deployment"]
-
-        subgraph "Pod(s)"
-          C["transport-booking-agent Container"]
-        end
-
-        subgraph "Container Details"
-            E[FastAPI Web Server]
-            G["/ (index.html)"]
-            H["/chat (API)"]
-        end
-    end
-
-    A -- "HTTPS Request" --> B
-    D -- "Manages Pod Replicas" --> C
-    B -- "Routes Port 80 to 8080" --> C
-    C -- "Runs" --> E
-    E -- "Serves" --> G
-    E -- "Handles" --> H
-```
+This project implements an AI-powered Transport Booking Agent. For a detailed description of the project, its features, and architecture, please see the technical specification in `docs/SPEC.md`.
 
 ## Directory Contents
 
-*   `app.py`: The main FastAPI application entry point.
 *   `requirements.txt`: Python dependencies for the project.
-*   `agents/`: Contains the implementation of various specialized agents (e.g., `QueryParsingAgent`, `SearchAgent`, `OrchestratorAgent`).
-*   `templates/`: HTML templates served by the FastAPI application (e.g., `index.html`).
-*   `kubernetes-manifests/`: Kubernetes YAML files for deploying the application:
-    *   `transport-booking-agent.deployment.yaml`: Defines the Kubernetes Deployment for the FastAPI application.
-    *   `transport-booking-agent.service.yaml`: Defines the Kubernetes Service (LoadBalancer) to expose the application externally.
-*   `docs/SPEC.md`: Detailed technical specifications and architecture overview of the Transport Booking Agent.
+*   `src/`: Contains the main application source code.
+    *   `transport_booking_agent/`: The main Python package.
+        *   `app.py`: The main FastAPI application entry point.
+        *   `models.py`: Pydantic and data models for the application state.
+        *   `graph/`: Contains the core graph orchestration logic.
+            *   `orchestrator.py`: Defines and compiles the LangGraph workflow.
+            *   `nodes.py`: Implementation of each node in the graph.
+        *   `services/`: Contains the implementation of various specialized services.
+            *   `recognition.py`: Recognizes transport mode and provider.
+            *   `parsing.py`: Extracts structured information from user text.
+            *   `search/`: Specialized search services for flights, trains, and buses.
+            *   `filtering.py`: Filters and ranks search results.
+            *   `booking.py`: Executes the final booking.
+            *   `user_profile.py`: Manages user data.
+            *   `guardrail.py`: Enforces safety and security policies.
+        *   `templates/`: HTML templates for the FastAPI application.
+*   `kubernetes-manifests/`: Kubernetes YAML files for deployment.
+*   `docs/SPEC.md`: Detailed technical specifications and architecture.
 
 ## Getting Started (Local Development)
 
@@ -97,7 +43,7 @@ graph TD
     ```
 4.  **Run the FastAPI application**:
     ```bash
-    uvicorn app:app --host 0.0.0.0 --port 8080
+    uvicorn src.transport_booking_agent.app:app --host 0.0.0.0 --port 8080
     ```
     The application will be accessible at `http://localhost:8080`.
 

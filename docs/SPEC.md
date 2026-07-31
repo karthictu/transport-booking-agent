@@ -1,74 +1,74 @@
 # Transport Booking Agent - Specification
 
-This document outlines the architecture and technical specifications for the AI-powered Transport Booking Agent.
+This document outlines the high-level architecture for the AI-powered Transport Booking Agent. For detailed implementation specifics, please refer to [`IMPLEMENTATION_DETAILS.md`](./IMPLEMENTATION_DETAILS.md).
 
-## 1. System Architecture
+## 1. High-Level Architecture
 
-The system uses a multi-agent architecture where a central **Orchestrator Agent** manages a team of specialized agents to fulfill a user's request.
+The system uses a multi-agent architecture orchestrated by **Langgraph**. A central **GraphOrchestrator** manages a graph of specialized agents to fulfill a user's request.
 
 ### Data Flow
 
 ```mermaid
 graph TD
-    User -- "Book a flight to Paris" --> A(Orchestrator Agent)
-    A -- "Parse this request" --> B(Query Parsing Agent)
-    B -- "origin: here, dest: Paris, mode: flight" --> A
-    A -- "Find flights to Paris" --> C(Search Agent)
-    C -- Calls Flight APIs --> D[External APIs]
-    D -- Raw flight data --> C
-    C -- Unsorted List of Flights --> A
-    A -- "Filter and rank these options" --> E(Filtering & Ranking Agent)
-    E -- Sorted, relevant options --> A
-    A -- Presents options to User --> User
-    User -- "I'll take the first one" --> A
-    A -- "Book this flight" --> F(Booking Agent)
-    F -- Handles booking transaction --> D
-    D -- Confirmation details --> F
-    F -- Booking Confirmation --> A
-    A -- "Your flight is booked!" --> User
+    User -- "Book a flight to Paris" --> A(Graph Orchestrator)
+    A -- Invokes Graph --> B(Agent Graph)
+    subgraph Agent Graph
+        direction LR
+        C(Get User Profile) --> D(Guardrail Check)
+        D -- Passed --> E(Recognize Mode/Provider)
+        D -- Failed --> Z(End)
+        E --> F(Parse Query)
+        F --> G{Route by Mode}
+        G -- Flight --> H(Flight Search)
+        G -- Train --> I(Train Search)
+        G -- Bus --> J(Bus Search)
+        G -- Unsupported --> Z
+        H --> K(Filter & Rank)
+        I --> K
+        J --> K
+        K --> L{Should Book?}
+        L -- No --> M(Present Results)
+        L -- Yes --> N(Book Transport)
+        M --> Z
+        N --> Z
+    end
+    B -- "Your flight is booked!" --> User
 ```
 
 ## 2. Agent Specifications
 
-### 2.1. Orchestrator Agent
-*   **Purpose**: The central coordinator. It understands the overall goal, creates a plan, and delegates tasks to specialist agents.
+### 2.1. GraphOrchestrator
+*   **Purpose**: The central coordinator. It uses a Langgraph graph to manage the flow of control between specialist agents.
 *   **Input**: User's natural language message (string).
 *   **Output**: A user-facing response message (string).
+*   **Structure**: The graph's structure is defined in `src/transport_booking_agent/graph/orchestrator.py`, while the logic for each node in the graph resides in `src/transport_booking_agent/graph/nodes.py`.
 *   **Logic**:
-    1.  Receive user message.
-    2.  Delegate to `QueryParsingAgent` to structure the request.
-    3.  Based on the structured query, delegate to `SearchAgent`.
-    4.  Delegate to `Filtering & RankingAgent` to process search results.
-    5.  Present results to the user.
-    6.  If the user selects an option, delegate to `BookingAgent`.
-    7.  Return a final confirmation to the user.
+    1.  Initialize the agent graph.
+    2.  The graph starts by getting the user profile and then checking the request against guardrails.
+    3.  If guardrails pass, it recognizes the transport mode and provider.
+    4.  It then routes to the appropriate search agent based on the recognized mode.
+    5.  The rest of the flow for filtering, ranking, presenting results, and booking remains the same.
 
-### 2.2. Query Parsing Agent
+### 2.2. Guardrail Service
+*   **Purpose**: To enforce safety and security policies.
+
+### 2.3. Recognition Service
+*   **Purpose**: To identify the transport mode and provider from the user's message.
+
+### 2.4. Parsing Service
 *   **Purpose**: To extract structured information from unstructured user text.
-*   **Input**: A user's message (string).
-*   **Output**: A `StructuredQuery` object.
-*   **Example**: "I need a flight to Berlin for 2 people next Friday" -> `{ "origin": "current_location", "destination": "Berlin", "passengers": 2, "date": "next Friday", "mode": "flight" }`
 
-### 2.3. Search Agent
-*   **Purpose**: To find available transport options by interfacing with external APIs.
-*   **Input**: A `StructuredQuery` object.
-*   **Output**: A list of `TransportOption` objects.
-*   **Tools**: API clients for flight, train, and bus services.
+### 2.5. Search Services
+*   **Purpose**: To find available transport options for a specific mode by interfacing with external APIs.
 
-### 2.4. Filtering & Ranking Agent
+### 2.6. Filtering Service
 *   **Purpose**: To refine and sort search results based on user preferences.
-*   **Input**: A list of `TransportOption` objects and user preferences (e.g., "cheapest", "fastest").
-*   **Output**: A sorted list of `TransportOption` objects.
 
-### 2.5. Booking Agent
+### 2.7. Booking Service
 *   **Purpose**: To execute the final booking transaction.
-*   **Input**: A specific `TransportOption` object and user details (name, payment info).
-*   **Output**: A `BookingConfirmation` object.
 
-### 2.6. User Profile Agent
+### 2.8. User Profile Service
 *   **Purpose**: To manage user data for personalization and history.
-*   **Input**: User ID.
-*   **Output**: User preferences, past trips, and personal information.
 
 ## 3. Data Models
 

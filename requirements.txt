@@ -2,3 +2,6 @@ fastapi
 uvicorn
 Jinja2
 pydantic
+langchain
+langgraph
+python-dotenv

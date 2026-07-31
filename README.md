@@ -1,81 +1,125 @@
-# Kubernetes Hello World with Cloud Code
+# Transport Booking Agent
 
-"Hello World" is a Kubernetes application that contains a single
-[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) and a corresponding
-[Service](https://kubernetes.io/docs/concepts/services-networking/service/). The Deployment contains a web server that renders a simple webpage.
+This project implements an AI-powered Transport Booking Agent using a multi-agent architecture, as detailed in `docs/SPEC.md`. The agent system coordinates various specialized agents to fulfill user requests for booking transport.
 
-For details on how to use this sample as a template in Cloud Code, read the documentation for Cloud Code for [VS Code](https://cloud.google.com/code/docs/vscode/quickstart-local-dev?utm_source=ext&utm_medium=partner&utm_campaign=CDR_kri_gcp_cloudcodereadmes_012521&utm_content=-) or [IntelliJ](https://cloud.google.com/code/docs/intellij/quickstart-k8s?utm_source=ext&utm_medium=partner&utm_campaign=CDR_kri_gcp_cloudcodereadmes_012521&utm_content=-).
+## Features
 
-### Table of Contents
-* [What's in this sample](#whats-in-this-sample)
-* [Getting Started with VS Code](#getting-started-with-vs-code)
-* [Getting Started with IntelliJ](#getting-started-with-intellij)
-* [Sign up for User Research](#sign-up-for-user-research)
+*   **Multi-Agent Architecture**: A central Orchestrator Agent delegates tasks to specialized agents for query parsing, searching, filtering, ranking, booking, and user profile management.
+*   **FastAPI Web Server**: Provides a web interface for user interaction and an API for chat functionality.
+*   **Kubernetes Deployment**: Designed for deployment on Google Kubernetes Engine (GKE) using provided Kubernetes manifests.
 
----
-## What's in this sample
-### Kubernetes architecture
-![Kubernetes Architecture Diagram](./img/diagram.png)
+## System Architecture
 
-### Directory contents
+The system utilizes a multi-agent architecture managed by a central **Orchestrator Agent**.
 
-- `skaffold.yaml` - A schema file that defines skaffold configurations ([skaffold.yaml reference](https://skaffold.dev/docs/references/yaml/))
-- `kubernetes-manifests/` - Contains Kubernetes YAML files for the Guestbook services and deployments, including:
+### Data Flow Overview
 
-  - `hello.deployment.yaml` - deploys a pod with the 'python-hello-world' container image
-  - `hello.service.yaml` - creates a load balancer and exposes the 'python-hello-world' service on an external IP in the cluster
+```mermaid
+graph TD
+    User -- "Book a flight to Paris" --> A(Orchestrator Agent)
+    A -- "Parse this request" --> B(Query Parsing Agent)
+    B -- "origin: here, dest: Paris, mode: flight" --> A
+    A -- "Find flights to Paris" --> C(Search Agent)
+    C -- Calls Flight APIs --> D[External APIs]
+    D -- Raw flight data --> C
+    C -- Unsorted List of Flights --> A
+    A -- "Filter and rank these options" --> E(Filtering & Ranking Agent)
+    E -- Sorted, relevant options --> A
+    A -- Presents options to User --> User
+    User -- "I'll take the first one" --> A
+    A -- "Book this flight" --> F(Booking Agent)
+    F -- Handles booking transaction --> D
+    D -- Confirmation details --> F
+    F -- Booking Confirmation --> A
+    A -- "Your flight is booked!" --> User
+```
 
----
-## Getting Started with VS Code
+### Kubernetes Infrastructure
 
-### Run the app locally with minikube
+The application is deployed on Google Kubernetes Engine.
 
-1. To run your application, click on the Cloud Code status bar and select ‘Run on Kubernetes’.  
-![image](./img/status-bar.png) 
+```mermaid
+graph TD
+    subgraph "User's Device"
+        A[Web Browser]
+    end
 
-2. Select ‘Run locally using minikube’ when prompted. Cloud Code runs your app in a local [minikube](https://minikube.sigs.k8s.io/docs/start/) cluster.  
-![image](./img/create-k8s-cluster.png)
+    subgraph "Google Kubernetes Engine Cluster"
+        B[transport-booking-agent-external Service (Type: LoadBalancer)]
+        D[transport-booking-agent Deployment]
 
-3. View the build progress in the OUTPUT window. Once the build has finished, click on the URL in the OUTPUT window to view your live application.  
-![image](./img/kubernetes-url.png)
+        subgraph "Pod(s)"
+          C[transport-booking-agent Container]
+        end
 
-4.  To stop the application, click the stop icon on the Debug Toolbar.
+        subgraph "Container Details"
+            E[FastAPI Web Server]
+            G["/ (index.html)"]
+            H["/chat (API)"]
+        end
+    end
 
----
-## Getting Started with IntelliJ
+    A -- "HTTPS Request" --> B
+    D -- "Manages Pod Replicas" --> C
+    B -- "Routes Port 80 to 8080" --> C
+    C -- "Runs" --> E
+    E -- "Serves" --> G
+    E -- "Handles" --> H
+```
 
-### Run the app locally with minikube
+## Directory Contents
 
-#### Edit run configuration
-1. Click the configuration dropdown in the top taskbar and then click **Edit Configurations**.
-![image](./img/edit-configurations.png)
+*   `app.py`: The main FastAPI application entry point.
+*   `requirements.txt`: Python dependencies for the project.
+*   `agents/`: Contains the implementation of various specialized agents (e.g., `QueryParsingAgent`, `SearchAgent`, `OrchestratorAgent`).
+*   `templates/`: HTML templates served by the FastAPI application (e.g., `index.html`).
+*   `kubernetes-manifests/`: Kubernetes YAML files for deploying the application:
+    *   `transport-booking-agent.deployment.yaml`: Defines the Kubernetes Deployment for the FastAPI application.
+    *   `transport-booking-agent.service.yaml`: Defines the Kubernetes Service (LoadBalancer) to expose the application externally.
+*   `docs/SPEC.md`: Detailed technical specifications and architecture overview of the Transport Booking Agent.
 
-   The **Develop on Kubernetes** configuration watches for changes, then uses [skaffold](https://skaffold.dev/docs/) to rebuild and rerun your app. You can customize your deployment by making changes to this run configuration or by creating a new Cloud Code: Kubernetes run configuration.
+## Getting Started (Local Development)
 
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd transport-booking-agent
+    ```
+2.  **Create and activate a virtual environment**:
+    ```bash
+    python -m venv .venv
+    ./.venv/Scripts/activate # On Windows
+    source ./.venv/bin/activate # On macOS/Linux
+    ```
+3.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **Run the FastAPI application**:
+    ```bash
+    uvicorn app:app --host 0.0.0.0 --port 8080
+    ```
+    The application will be accessible at `http://localhost:8080`.
 
-3. Under **Run > Deployment**, select 'Deploy locally to a minikube cluster'.
-![image](./img/run-debug-dialog.png)
+## Deployment to Kubernetes (GKE)
 
-4. Click **OK** to save your configuration. 
+1.  **Build Docker Image**:
+    ```bash
+    docker build -t transport-booking-agent:latest .
+    # Tag and push to your container registry (e.g., Google Container Registry)
+    # docker tag transport-booking-agent:latest gcr.io/<YOUR_PROJECT_ID>/transport-booking-agent:latest
+    # docker push gcr.io/<YOUR_PROJECT_ID>/transport-booking-agent:latest
+    ```
+    _Remember to replace `<YOUR_PROJECT_ID>` with your Google Cloud Project ID._
 
+2.  **Apply Kubernetes Manifests**:
+    ```bash
+    kubectl apply -f kubernetes-manifests/
+    ```
 
-#### Run the app on minikube
-1. Select **Develop on Kubernetes** from the configuration dropdown and click the run icon. Cloud Code runs your app in a local [minikube](ttps://minikube.sigs.k8s.io/docs/start/) cluster.  
-![image](./img/edit-configurations.png)
-
-
-2. View the build process in the output window. When the deployment is successful, you're notified that new service URLs are available. Click the Service URLs tab to view the URL(s), then click the URL link to open your browser with your running application.  
-![image](./img/service-urls.png)
-
-3. To stop the application, click the stop icon next to the configuration dropdown.
-
----
-## Sign up for User Research
-
-We want to hear your feedback!
-
-The Cloud Code team is inviting our user community to sign-up to participate in Google User Experience Research. 
-
-If you’re invited to join a study, you may try out a new product or tell us what you think about the products you use every day. At this time, Google is only sending invitations for upcoming remote studies. Once a study is complete, you’ll receive a token of thanks for your participation such as a gift card or some Google swag. 
-
-[Sign up using this link](https://google.qualtrics.com/jfe/form/SV_4Me7SiMewdvVYhL?reserved=1&utm_source=In-product&Q_Language=en&utm_medium=own_prd&utm_campaign=Q1&productTag=clou&campaignDate=January2021&referral_code=UXbT481079) and answer a few questions about yourself, as this will help our research team match you to studies that are a great fit.
+3.  **Access the Application**:
+    Once deployed, get the external IP of the LoadBalancer service:
+    ```bash
+    kubectl get services transport-booking-agent-external
+    ```
+    Access the application using the `EXTERNAL-IP` shown in the output.

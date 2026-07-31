@@ -107,11 +107,11 @@ graph TD
     end
 
     subgraph "Google Kubernetes Engine Cluster"
-        B[transport-booking-agent-external Service (Type: LoadBalancer)]
-        D[transport-booking-agent Deployment]
+        B["transport-booking-agent-external Service (Type: LoadBalancer)"]
+        D["transport-booking-agent Deployment"]
 
         subgraph "Pod(s)"
-          C[transport-booking-agent Container]
+          C["transport-booking-agent Container"]
         end
 
         subgraph "Container Details"

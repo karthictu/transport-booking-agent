@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: transport-booking-agent-external
+spec:
+  type: LoadBalancer
+  selector:
+    app: transport-booking-agent
+  ports:
+  - port: 80
+    targetPort: 8080

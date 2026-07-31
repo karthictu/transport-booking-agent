@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transport-booking-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transport-booking-agent
+  template:
+    metadata:
+      labels:
+        app: transport-booking-agent
+    spec:
+      containers:
+      - name: transport-booking-agent
+        image: transport-booking-agent:latest
+        ports:
+        - containerPort: 8080

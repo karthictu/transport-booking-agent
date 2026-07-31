@@ -115,7 +115,7 @@ graph TD
         end
 
         subgraph "Container Details"
-            E[Flask Web Server]
+            E[FastAPI Web Server]
             G["/ (index.html)"]
             H["/chat (API)"]
         end

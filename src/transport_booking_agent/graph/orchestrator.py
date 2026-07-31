@@ -8,6 +8,8 @@ from ..services.recognition import RecognitionService
 from ..services.search.flight import FlightSearchService
 from ..services.search.train import TrainSearchService
 from ..services.search.bus import BusSearchService
+from ..services.search.cab import CabSearchService
+from ..services.search.bike import BikeSearchService
 from ..models import AgentState
 from .nodes import *
 from langgraph.graph import StateGraph, END
@@ -15,13 +17,15 @@ from langgraph.graph import StateGraph, END
 # Initialize agents
 query_parser = ParsingService()
 filter_ranker = FilteringService()
-booking_agent = BookingAgent()
+booking_agent = BookingService()
 user_profile_agent = UserProfileService()
 guardrail_agent = GuardrailService()
 mode_provider_recognition_agent = RecognitionService()
 flight_search_agent = FlightSearchService()
 train_search_agent = TrainSearchService()
 bus_search_agent = BusSearchService()
+cab_search_agent = CabSearchService()
+bike_search_agent = BikeSearchService()
 
 def create_graph_workflow():
     """Creates the LangGraph workflow."""
@@ -35,6 +39,8 @@ def create_graph_workflow():
     workflow.add_node("flight_search", partial(flight_search_node, flight_search_agent=flight_search_agent))
     workflow.add_node("train_search", partial(train_search_node, train_search_agent=train_search_agent))
     workflow.add_node("bus_search", partial(bus_search_node, bus_search_agent=bus_search_agent))
+    workflow.add_node("cab_search", partial(cab_search_node, cab_search_agent=cab_search_agent))
+    workflow.add_node("bike_search", partial(bike_search_node, bike_search_agent=bike_search_agent))
     workflow.add_node("handle_unsupported_mode", handle_unsupported_mode_node)
     workflow.add_node("ask_for_provider", ask_for_provider_node)
     workflow.add_node("filter_and_rank", partial(filter_and_rank_node, filter_ranker=filter_ranker))
@@ -50,7 +56,7 @@ def create_graph_workflow():
 
     def route_by_mode(state: AgentState) -> str:
         mode = state.get('recognized_mode')
-        if mode in ['flight', 'train', 'bus']:
+        if mode in ['flight', 'train', 'bus', 'cab', 'bike']:
             return f'{mode}_search'
         return 'handle_unsupported_mode'
 
@@ -66,6 +72,8 @@ def create_graph_workflow():
     workflow.add_edge("flight_search", "filter_and_rank")
     workflow.add_edge("train_search", "filter_and_rank")
     workflow.add_edge("bus_search", "filter_and_rank")
+    workflow.add_edge("cab_search", "filter_and_rank")
+    workflow.add_edge("bike_search", "filter_and_rank")
     workflow.add_edge("handle_unsupported_mode", END)
     workflow.add_edge("ask_for_provider", END)
     workflow.add_edge("filter_and_rank", "present_results")

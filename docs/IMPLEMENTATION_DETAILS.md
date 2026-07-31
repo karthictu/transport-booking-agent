@@ -31,6 +31,8 @@ This document provides detailed implementation specifics for the AI-powered Tran
     *   `FlightSearchService`
     *   `TrainSearchService`
     *   `BusSearchService`
+    *   `CabSearchService`
+    *   `BikeSearchService`
 
 ### 1.6. Filtering Service
 *   **Purpose**: To refine and sort search results based on user preferences.
@@ -52,7 +54,7 @@ This document provides detailed implementation specifics for the AI-powered Tran
   "destination": "string",
   "date": "string",
   "passengers": "int",
-  "mode": "string (flight, train, bus)",
+  "mode": "string (flight, train, bus, cab, bike)",
   "preferences": "list[string] (e.g., 'cheapest', 'business class')"
 }
 ```

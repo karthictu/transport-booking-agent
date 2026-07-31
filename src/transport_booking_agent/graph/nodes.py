@@ -51,9 +51,21 @@ def bus_search_node(state: AgentState, bus_search_agent) -> AgentState:
     state['transport_options'] = transport_options
     return state
 
+def cab_search_node(state: AgentState, cab_search_agent) -> AgentState:
+    print("---SEARCHING FOR CABS---")
+    transport_options: List[TransportOption] = cab_search_agent.search(state['structured_query'])
+    state['transport_options'] = transport_options
+    return state
+
+def bike_search_node(state: AgentState, bike_search_agent) -> AgentState:
+    print("---SEARCHING FOR BIKES---")
+    transport_options: List[TransportOption] = bike_search_agent.search(state['structured_query'])
+    state['transport_options'] = transport_options
+    return state
+
 def handle_unsupported_mode_node(state: AgentState) -> AgentState:
     print("---HANDLING UNSUPPORTED MODE---")
-    state['response'] = "Sorry, I can only handle flight, train, and bus requests at the moment."
+    state['response'] = "Sorry, I can only handle flight, train, bus, cab, and bike requests at the moment."
     return state
 
 def ask_for_provider_node(state: AgentState) -> AgentState:

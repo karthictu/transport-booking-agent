@@ -1,7 +1,7 @@
-from agents.models import TransportOption
+from ..models import TransportOption
 from typing import List
 
-class FilteringRankingAgent:
+class FilteringAgent:
     def filter_and_rank(self, options: List[TransportOption], preferences: List[str]) -> List[TransportOption]:
         # Dummy implementation for now.
         # This will be replaced with actual filtering and ranking logic later.

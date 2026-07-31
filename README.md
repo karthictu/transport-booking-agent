@@ -12,14 +12,14 @@ This project implements an AI-powered Transport Booking Agent. For a detailed de
         *   `graph/`: Contains the core graph orchestration logic.
             *   `orchestrator.py`: Defines and compiles the LangGraph workflow.
             *   `nodes.py`: Implementation of each node in the graph.
-        *   `services/`: Contains the implementation of various specialized services.
-            *   `recognition.py`: Recognizes transport mode and provider.
-            *   `parsing.py`: Extracts structured information from user text.
-            *   `search/`: Specialized search services for flights, trains, and buses.
-            *   `filtering.py`: Filters and ranks search results.
-            *   `booking.py`: Executes the final booking.
-            *   `user_profile.py`: Manages user data.
-            *   `guardrail.py`: Enforces safety and security policies.
+        *   `agents/`: Contains the implementation of various specialized agents.
+            *   `recognition_agent.py`: Recognizes transport mode and provider.
+            *   `parsing_agent.py`: Extracts structured information from user text.
+            *   `search/`: Specialized search agents for flights, trains, and buses.
+            *   `filtering_agent.py`: Filters and ranks search results.
+            *   `booking_agent.py`: Executes the final booking.
+            *   `user_profile_agent.py`: Manages user data.
+            *   `guardrail_agent.py`: Enforces safety and security policies.
         *   `templates/`: HTML templates for the FastAPI application.
 *   `kubernetes-manifests/`: Kubernetes YAML files for deployment.
 *   `docs/SPEC.md`: Detailed technical specifications and architecture.

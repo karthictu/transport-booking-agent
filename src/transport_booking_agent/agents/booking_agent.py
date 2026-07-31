@@ -1,6 +1,6 @@
 from ..models import TransportOption, BookingConfirmation
 
-class BookingService:
+class BookingAgent:
     def book_transport(self, option: TransportOption, user_details: dict) -> BookingConfirmation:
         # Dummy implementation for now.
         # This will be replaced with actual booking API calls later.

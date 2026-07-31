@@ -1,31 +1,31 @@
 from functools import partial
-from ..services.parsing import ParsingService
-from ..services.filtering import FilteringService
-from ..services.booking import BookingService
-from ..services.user_profile import UserProfileService
-from ..services.guardrail import GuardrailService
-from ..services.recognition import RecognitionService
-from ..services.search.flight import FlightSearchService
-from ..services.search.train import TrainSearchService
-from ..services.search.bus import BusSearchService
-from ..services.search.cab import CabSearchService
-from ..services.search.bike import BikeSearchService
+from ..agents.parsing_agent import ParsingAgent
+from ..agents.filtering_agent import FilteringAgent
+from ..agents.booking_agent import BookingAgent
+from ..agents.user_profile_agent import UserProfileAgent
+from ..agents.guardrail_agent import GuardrailAgent
+from ..agents.recognition_agent import RecognitionAgent
+from ..agents.search.flight_search_agent import FlightSearchAgent
+from ..agents.search.train_search_agent import TrainSearchAgent
+from ..agents.search.bus_search_agent import BusSearchAgent
+from ..agents.search.cab_search_agent import CabSearchAgent
+from ..agents.search.bike_search_agent import BikeSearchAgent
 from ..models import AgentState
 from .nodes import *
 from langgraph.graph import StateGraph, END
 
 # Initialize agents
-query_parser = ParsingService()
-filter_ranker = FilteringService()
-booking_agent = BookingService()
-user_profile_agent = UserProfileService()
-guardrail_agent = GuardrailService()
-mode_provider_recognition_agent = RecognitionService()
-flight_search_agent = FlightSearchService()
-train_search_agent = TrainSearchService()
-bus_search_agent = BusSearchService()
-cab_search_agent = CabSearchService()
-bike_search_agent = BikeSearchService()
+query_parser = ParsingAgent()
+filter_ranker = FilteringAgent()
+booking_agent = BookingAgent()
+user_profile_agent = UserProfileAgent()
+guardrail_agent = GuardrailAgent()
+mode_provider_recognition_agent = RecognitionAgent()
+flight_search_agent = FlightSearchAgent()
+train_search_agent = TrainSearchAgent()
+bus_search_agent = BusSearchAgent()
+cab_search_agent = CabSearchAgent()
+bike_search_agent = BikeSearchAgent()
 
 def create_graph_workflow():
     """Creates the LangGraph workflow."""

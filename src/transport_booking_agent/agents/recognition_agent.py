@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, Dict, Any
 
-class RecognitionService:
+class RecognitionAgent:
     def recognize(self, message: str, user_profile: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
         """
         Recognizes the transport mode and provider from the user message.

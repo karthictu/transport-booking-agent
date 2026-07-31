@@ -2,9 +2,9 @@ from typing import List
 from ...models import StructuredQuery, TransportOption
 import datetime
 
-class CabSearchService:
+class CabSearchAgent:
     """
-    A service to search for cab options.
+    An agent to search for cab options.
     This is a mock implementation.
     """
     def search(self, query: StructuredQuery) -> List[TransportOption]:

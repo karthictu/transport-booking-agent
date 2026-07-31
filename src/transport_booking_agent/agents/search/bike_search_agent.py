@@ -2,9 +2,9 @@ from typing import List
 from ...models import StructuredQuery, TransportOption
 import datetime
 
-class BikeSearchService:
+class BikeSearchAgent:
     """
-    A service to search for motorcycle rental options.
+    An agent to search for motorcycle rental options.
     This is a mock implementation.
     """
     def search(self, query: StructuredQuery) -> List[TransportOption]:

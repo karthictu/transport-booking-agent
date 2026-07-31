@@ -2,7 +2,7 @@
 
 This document provides detailed implementation specifics for the AI-powered Transport Booking Agent. For a high-level overview of the architecture, please see [`SPEC.md`](./SPEC.md).
 
-## 1. Service Specifications
+## 1. Agent Specifications
 
 ### 1.1. GraphOrchestrator
 *   **Purpose**: The central coordinator. It uses a Langgraph graph to manage the flow of control between specialist agents.
@@ -16,36 +16,36 @@ This document provides detailed implementation specifics for the AI-powered Tran
     4.  It then routes to the appropriate search agent based on the recognized mode.
     5.  The rest of the flow for filtering, ranking, presenting results, and booking remains the same.
 
-### 1.2. Guardrail Service
+### 1.2. Guardrail Agent
 *   **Purpose**: To enforce safety and security policies.
 
-### 1.3. Recognition Service
+### 1.3. Recognition Agent
 *   **Purpose**: To identify the transport mode and provider from the user's message.
 
-### 1.4. Parsing Service
+### 1.4. Parsing Agent
 *   **Purpose**: To extract structured information from unstructured user text.
 
-### 1.5. Search Services
+### 1.5. Search Agents
 *   **Purpose**: To find available transport options for a specific mode by interfacing with external APIs.
-*   **Services**:
-    *   `FlightSearchService`
-    *   `TrainSearchService`
-    *   `BusSearchService`
-    *   `CabSearchService`
-    *   `BikeSearchService`
+*   **Agents**:
+    *   `FlightSearchAgent`
+    *   `TrainSearchAgent`
+    *   `BusSearchAgent`
+    *   `CabSearchAgent`
+    *   `BikeSearchAgent`
 
-### 1.6. Filtering Service
+### 1.6. Filtering Agent
 *   **Purpose**: To refine and sort search results based on user preferences.
 
-### 1.7. Booking Service
+### 1.7. Booking Agent
 *   **Purpose**: To execute the final booking transaction.
 *   **Persistence**: Persists the `BookingConfirmation` to the PostgreSQL database.
 
-### 1.8. User Profile Service
+### 1.8. User Profile Agent
 *   **Purpose**: To manage user data for personalization and history.
 *   **Persistence**: Retrieves user data from a PostgreSQL database, utilizing a Redis cache to accelerate access to frequently requested profiles.
 
-### 1.9. Authentication Service
+### 1.9. Authentication Agent
 *   **Purpose**: To authenticate users and protect API endpoints.
 *   **Implementation**: Authentication is handled by the `get_current_user` dependency in `src/transport_booking_agent/auth.py`.
 *   **Logic**:

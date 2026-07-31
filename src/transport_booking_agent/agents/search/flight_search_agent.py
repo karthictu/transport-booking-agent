@@ -1,4 +1,4 @@
-from agents.models import StructuredQuery, TransportOption
+from ....models import StructuredQuery, TransportOption
 from datetime import datetime, timedelta
 from typing import List
 

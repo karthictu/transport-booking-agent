@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 import redis
 import psycopg2
@@ -27,8 +27,8 @@ class UserProfileAgent:
         with self.db_conn.cursor() as cur:
             cur.execute("SELECT profile_data FROM user_profiles WHERE user_id = %s", (user_id,))
             result = cur.fetchone()
-            if result:
-                profile_data = result
+            if result and result[0]:
+                profile_data = result[0]
                 # 3. Store in cache for future requests
                 self.redis_client.set(f"user_profile:{user_id}", json.dumps(profile_data), ex=3600) # Cache for 1 hour
                 return profile_data

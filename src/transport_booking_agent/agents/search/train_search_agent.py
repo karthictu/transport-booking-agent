@@ -2,7 +2,7 @@ from ....models import StructuredQuery, TransportOption
 from datetime import datetime, timedelta
 from typing import List
 
-class TrainSearchService:
+class TrainSearchAgent:
     def search(self, query: StructuredQuery) -> List[TransportOption]:
         """
         Searches for trains based on the query.

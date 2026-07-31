@@ -1,7 +1,8 @@
-from agents.models import StructuredQuery
+from typing import Optional
+from ..models import StructuredQuery
 from datetime import datetime
 
-class QueryParsingAgent:
+class ParsingAgent:
     def parse_query(self, user_message: str, recognized_mode: Optional[str] = None, recognized_provider: Optional[str] = None) -> StructuredQuery:
         # Dummy implementation for now.
         # This will be replaced with actual NLP parsing later.

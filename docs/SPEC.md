@@ -36,6 +36,8 @@ The system is built around a central **Graph Orchestrator** that manages a workf
 
 5.  **User Management**: A **User Profile Service** maintains user data to personalize the experience and streamline bookings.
 
+6.  **Authentication**: User identity is verified using Google OAuth 2.0. API requests are authenticated by validating a Google ID token sent in the `Authorization` header. This ensures that only authorized users can access the service.
+
 ## 5. Data Flow
 
 The typical data flow for a user request is as follows:

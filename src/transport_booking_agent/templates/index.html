@@ -3,10 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <title>Transport Booking Agent</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        #header {
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #user-info { display: none; align-items: center; }
+        #user-info img { border-radius: 50%; margin-right: 10px; }
+        #sign-out-btn {
+            background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;
+        }
+        #login-prompt { text-align: center; padding: 40px; }
+        #chat-window { display: none; padding: 20px; }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message { margin-bottom: 10px; }
+        .user-message { text-align: right; color: #0056b3; }
+        .bot-message { text-align: left; color: #333; }
+        #chat-input { display: flex; }
+        #chat-input input { flex-grow: 1; border: 1px solid #ccc; padding: 10px; border-radius: 4px 0 0 4px; }
+        #chat-input button {
+            border: none; background-color: #007bff; color: white; padding: 10px 15px; cursor: pointer; border-radius: 0 4px 4px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Transport Booking Agent</h1>
-    <p>This is the main page.</p>
+    <div id="app-container">
+        <div id="header">
+            <h2>Transport Booking Agent</h2>
+            <div id="user-info">
+                <img id="user-pic" src="" alt="User" width="40" height="40">
+                <span id="user-name"></span>
+                <button id="sign-out-btn" onclick="signOut();">Sign Out</button>
+            </div>
+        </div>
+
+        <div id="login-prompt">
+            <h3>Please sign in to continue</h3>
+            <div class="g-signin2" data-onsuccess="onSignIn"></div>
+        </div>
+
+        <div id="chat-window">
+            <div id="messages"></div>
+            <div id="chat-input">
+                <input type="text" id="message-input" placeholder="Ask me to book a flight, train, or cab...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let googleIdToken = null;
+        let googleUserId = null;
+
+        function onSignIn(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            googleIdToken = googleUser.getAuthResponse().id_token;
+            googleUserId = profile.getId();
+
+            document.getElementById('user-name').innerText = profile.getName();
+            document.getElementById('user-pic').src = profile.getImageUrl();
+
+            document.getElementById('login-prompt').style.display = 'none';
+            document.getElementById('user-info').style.display = 'flex';
+            document.getElementById('chat-window').style.display = 'block';
+        }
+
+        function signOut() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(() => {
+                googleIdToken = null;
+                googleUserId = null;
+                document.getElementById('login-prompt').style.display = 'block';
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('chat-window').style.display = 'none';
+            });
+        }
+
+        document.getElementById('send-btn').addEventListener('click', async () => {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<div class="message user-message"><b>You:</b> ${message}</div>`;
+            input.value = '';
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${googleIdToken}`
+                },
+                body: JSON.stringify({
+                    user_message: message,
+                    user_id: googleUserId
+                })
+            });
+
+            const data = await response.json();
+            messagesDiv.innerHTML += `<div class="message bot-message"><b>Agent:</b> ${data.response}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+    </script>
 </body>
 </html>

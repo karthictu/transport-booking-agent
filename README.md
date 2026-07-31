@@ -24,6 +24,12 @@ This project implements an AI-powered Transport Booking Agent. For a detailed de
 *   `kubernetes-manifests/`: Kubernetes YAML files for deployment.
 *   `docs/SPEC.md`: Detailed technical specifications and architecture.
 
+## Authentication
+
+This application uses Google OAuth 2.0 for user authentication. All API requests must include a valid Google ID token in the `Authorization` header as a Bearer token.
+
+The server validates the token with Google and uses it to identify the user.
+
 ## Getting Started (Local Development)
 
 1.  **Clone the repository**:
@@ -41,7 +47,21 @@ This project implements an AI-powered Transport Booking Agent. For a detailed de
     ```bash
     pip install -r requirements.txt
     ```
-4.  **Run the FastAPI application**:
+4.  **Set Environment Variables**:
+    You must set your Google Client ID as an environment variable.
+    ```bash
+    # On Windows (Command Prompt)
+    set GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
+
+    # On Windows (PowerShell)
+    $env:GOOGLE_CLIENT_ID="<YOUR_GOOGLE_CLIENT_ID>"
+
+    # On macOS/Linux
+    export GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
+    ```
+    _Replace `<YOUR_GOOGLE_CLIENT_ID>` with your actual Google Client ID._
+
+5.  **Run the FastAPI application**:
     ```bash
     uvicorn src.transport_booking_agent.app:app --host 0.0.0.0 --port 8080
     ```

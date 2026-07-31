@@ -45,6 +45,17 @@ This document provides detailed implementation specifics for the AI-powered Tran
 *   **Purpose**: To manage user data for personalization and history.
 *   **Persistence**: Retrieves user data from a PostgreSQL database, utilizing a Redis cache to accelerate access to frequently requested profiles.
 
+### 1.9. Authentication Service
+*   **Purpose**: To authenticate users and protect API endpoints.
+*   **Implementation**: Authentication is handled by the `get_current_user` dependency in `src/transport_booking_agent/auth.py`.
+*   **Logic**:
+    1.  The `get_current_user` function is a FastAPI dependency that relies on the `OAuth2PasswordBearer` scheme.
+    2.  It extracts the Bearer token from the `Authorization` header of incoming requests.
+    3.  The token, which is expected to be a Google ID token, is verified using the `google-auth` library.
+    4.  Verification is performed by checking the token's signature against Google's public keys and ensuring the token's audience (`aud` claim) matches the `GOOGLE_CLIENT_ID` environment variable.
+    5.  If the token is valid, the function returns the token's claims (payload), which includes user information like email and Google user ID.
+    6.  If the token is invalid, expired, or the client ID does not match, a `401 Unauthorized` HTTP exception is raised.
+
 ## 2. Data Models
 
 ### StructuredQuery (dict)

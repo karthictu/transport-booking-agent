@@ -40,7 +40,30 @@ The system is built around a central **Graph Orchestrator** that manages a workf
 
 The typical data flow for a user request is as follows:
 
-`User Message` -> `GraphOrchestrator` -> `GuardrailService` -> `RecognitionService` -> `ParsingService` -> `[Mode]SearchService` -> `FilteringService` -> `BookingService` -> `User Confirmation`
+```mermaid
+sequenceDiagram
+    participant User
+    participant GraphOrchestrator
+    participant GuardrailService
+    participant RecognitionService
+    participant ParsingService
+    participant SearchServices
+    participant FilteringService
+    participant BookingService
+
+    User->>GraphOrchestrator: Sends message
+    GraphOrchestrator->>GuardrailService: check_guardrails()
+    GuardrailService-->>GraphOrchestrator: Safety check result
+    GraphOrchestrator->>RecognitionService: recognize()
+    RecognitionService-->>GraphOrchestrator: Recognized mode/provider
+    GraphOrchestrator->>ParsingService: parse_query()
+    ParsingService-->>GraphOrchestrator: Structured query
+    GraphOrchestrator->>SearchServices: search(query)
+    SearchServices-->>GraphOrchestrator: Transport options
+    GraphOrchestrator->>FilteringService: filter_and_rank(options)
+    FilteringService-->>GraphOrchestrator: Filtered options
+    GraphOrchestrator-->>User: Presents results
+```
 
 ---
 

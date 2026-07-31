@@ -1,130 +1,47 @@
 # Transport Booking Agent - Specification
 
-This document outlines the high-level architecture for the AI-powered Transport Booking Agent. For detailed implementation specifics, please refer to [`IMPLEMENTATION_DETAILS.md`](./IMPLEMENTATION_DETAILS.md).
+## 1. Overview
 
-## 1. High-Level Architecture
+The Transport Booking Agent is an AI-powered conversational agent designed to simplify the process of finding and booking transportation. Users can interact with the agent using natural language to search for flights, trains, buses, cabs, and bikes, and eventually book their preferred option.
 
-The system uses a multi-agent architecture orchestrated by **Langgraph**. A central **GraphOrchestrator** manages a graph of specialized agents to fulfill a user's request.
+## 2. Core Features
 
-### Data Flow
+*   **Natural Language Understanding**: The agent can understand and process user requests in conversational language.
+*   **Multi-Modal Transport Search**: It supports searching across various modes of transportation.
+*   **User Preference Filtering**: Search results can be filtered and ranked based on user preferences like "cheapest" or "fastest".
+*   **End-to-End Booking**: The agent can handle the entire booking process, from search to confirmation.
+*   **Personalization**: Leverages user profiles to provide a personalized experience.
+*   **Safety**: Includes guardrails to ensure safe and appropriate interactions.
 
-```mermaid
-graph TD
-    User -- "Book a flight to Paris" --> A(Graph Orchestrator)
-    A -- Invokes Graph --> B(Agent Graph)
-    subgraph Agent Graph
-        direction LR
-        C(Get User Profile) --> D(Guardrail Check)
-        D -- Passed --> E(Recognize Mode/Provider)
-        D -- Failed --> Z(End)
-        E --> F(Parse Query)
-        F --> G{Route by Mode}
-        G -- Flight --> H(Flight Search)
-        G -- Train --> I(Train Search)
-        G -- Bus --> J(Bus Search)
-        G -- Unsupported --> Z
-        H --> K(Filter & Rank)
-        I --> K
-        J --> K
-        K --> L{Should Book?}
-        L -- No --> M(Present Results)
-        L -- Yes --> N(Book Transport)
-        M --> Z
-        N --> Z
-    end
-    B -- "Your flight is booked!" --> User
-```
+## 3. Supported Transport Modes
 
-## 2. Agent Specifications
+The agent is capable of searching for and booking the following types of transport:
+*   Flights
+*   Trains
+*   Buses
+*   Cabs
+*   Bikes
 
-### 2.1. GraphOrchestrator
-*   **Purpose**: The central coordinator. It uses a Langgraph graph to manage the flow of control between specialist agents.
-*   **Input**: User's natural language message (string).
-*   **Output**: A user-facing response message (string).
-*   **Structure**: The graph's structure is defined in `src/transport_booking_agent/graph/orchestrator.py`, while the logic for each node in the graph resides in `src/transport_booking_agent/graph/nodes.py`.
-*   **Logic**:
-    1.  Initialize the agent graph.
-    2.  The graph starts by getting the user profile and then checking the request against guardrails.
-    3.  If guardrails pass, it recognizes the transport mode and provider.
-    4.  It then routes to the appropriate search agent based on the recognized mode.
-    5.  The rest of the flow for filtering, ranking, presenting results, and booking remains the same.
+## 4. High-Level Architecture
 
-### 2.2. Guardrail Service
-*   **Purpose**: To enforce safety and security policies.
+The system is built around a central **Graph Orchestrator** that manages a workflow of specialized services.
 
-### 2.3. Recognition Service
-*   **Purpose**: To identify the transport mode and provider from the user's message.
+1.  **Input Processing**: The user's message is first checked by a **Guardrail Service** for safety and then processed by a **Recognition Service** to identify the transport mode and a **Parsing Service** to extract key details (e.g., origin, destination).
 
-### 2.4. Parsing Service
-*   **Purpose**: To extract structured information from unstructured user text.
+2.  **Search**: The request is routed to the appropriate **Search Service** (e.g., `FlightSearchService`, `CabSearchService`) which fetches available options from external APIs.
 
-### 2.5. Search Services
-*   **Purpose**: To find available transport options for a specific mode by interfacing with external APIs.
+3.  **Filtering & Presentation**: The results are consolidated, filtered by a **Filtering Service**, and presented to the user for selection.
 
-### 2.6. Filtering Service
-*   **Purpose**: To refine and sort search results based on user preferences.
+4.  **Booking**: Once the user selects an option, the **Booking Service** completes the transaction and provides a confirmation.
 
-### 2.7. Booking Service
-*   **Purpose**: To execute the final booking transaction.
+5.  **User Management**: A **User Profile Service** maintains user data to personalize the experience and streamline bookings.
 
-### 2.8. User Profile Service
-*   **Purpose**: To manage user data for personalization and history.
+## 5. Data Flow
 
-## 3. Data Models
+The typical data flow for a user request is as follows:
 
-### StructuredQuery (dict)
-```json
-{
-  "origin": "string",
-  "destination": "string",
-  "date": "string",
-  "passengers": "int",
-  "mode": "string (flight, train, bus)",
-  "preferences": "list[string] (e.g., 'cheapest', 'business class')"
-}
-```
+`User Message` -> `GraphOrchestrator` -> `GuardrailService` -> `RecognitionService` -> `ParsingService` -> `[Mode]SearchService` -> `FilteringService` -> `BookingService` -> `User Confirmation`
 
-### TransportOption (dict)
-```json
-{
-  "type": "string (flight, train, bus)",
-  "provider": "string (e.g., 'United Airlines')",
-  "departure_time": "datetime",
-  "arrival_time": "datetime",
-  "price": "float",
-  "booking_id": "string"
-}
-```
+---
 
-## 4. Infrastructure Architecture
-
-This diagram shows the Kubernetes infrastructure setup for deploying the application.
-
-```mermaid
-graph TD
-    subgraph "User's Device"
-        A[Web Browser]
-    end
-
-    subgraph "Google Kubernetes Engine Cluster"
-        B["transport-booking-agent-external Service (Type: LoadBalancer)"]
-        D["transport-booking-agent Deployment"]
-
-        subgraph "Pod(s)"
-          C["transport-booking-agent Container"]
-        end
-
-        subgraph "Container Details"
-            E[FastAPI Web Server]
-            G["/ (index.html)"]
-            H["/chat (API)"]
-        end
-    end
-
-    A -- "HTTPS Request" --> B
-    D -- "Manages Pod Replicas" --> C
-    B -- "Routes Port 80 to 8080" --> C
-    C -- "Runs" --> E
-    E -- "Serves" --> G
-    E -- "Handles" --> H
-```
+For more granular technical details, please refer to `IMPLEMENTATION_DETAILS.md`.

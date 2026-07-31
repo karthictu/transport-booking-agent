@@ -107,11 +107,11 @@ graph TD
     end
 
     subgraph "Google Kubernetes Engine Cluster"
-        B[python-hello-world-external Service (Type: LoadBalancer)]
-        D[python-hello-world Deployment]
+        B[transport-booking-agent-external Service (Type: LoadBalancer)]
+        D[transport-booking-agent Deployment]
 
         subgraph "Pod(s)"
-          C[python-hello-world Container]
+          C[transport-booking-agent Container]
         end
 
         subgraph "Container Details"
